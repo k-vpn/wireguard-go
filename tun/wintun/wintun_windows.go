@@ -154,42 +154,14 @@ func (pool Pool) GetInterface(ifname string) (*Interface, error) {
 		ifname3 := removeNumberedSuffix(ifname2)
 
 		if ifname == ifname2 || ifname == ifname3 {
-			err = devInfo.BuildDriverInfoList(devInfoData, setupapi.SPDIT_COMPATDRIVER)
+			isMember, err := pool.isMember(devInfo, devInfoData)
 			if err != nil {
-				return nil, fmt.Errorf("SetupDiBuildDriverInfoList failed: %v", err)
+				return nil, err
 			}
-			defer devInfo.DestroyDriverInfoList(devInfoData, setupapi.SPDIT_COMPATDRIVER)
-
-			for index := 0; ; index++ {
-				driverData, err := devInfo.EnumDriverInfo(devInfoData, setupapi.SPDIT_COMPATDRIVER, index)
-				if err != nil {
-					if err == windows.ERROR_NO_MORE_ITEMS {
-						break
-					}
-					continue
-				}
-
-				// Get driver info details.
-				driverDetailData, err := devInfo.DriverInfoDetail(devInfoData, driverData)
-				if err != nil {
-					continue
-				}
-
-				if driverDetailData.IsCompatible(hardwareID) {
-					isMember, err := pool.isMember(devInfo, devInfoData)
-					if err != nil {
-						return nil, err
-					}
-					if !isMember {
-						return nil, windows.ERROR_ALREADY_EXISTS
-					}
-
-					return wintun, nil
-				}
+			if !isMember {
+				return nil, windows.ERROR_ALREADY_EXISTS
 			}
-
-			// This interface is not using Wintun driver.
-			return nil, windows.ERROR_ALREADY_EXISTS
+			return wintun, nil
 		}
 	}
 
@@ -512,34 +484,6 @@ func (pool Pool) DeleteMatchingInterfaces(matches func(wintun *Interface) bool) 
 			continue
 		}
 
-		err = devInfo.BuildDriverInfoList(devInfoData, setupapi.SPDIT_COMPATDRIVER)
-		if err != nil {
-			continue
-		}
-		defer devInfo.DestroyDriverInfoList(devInfoData, setupapi.SPDIT_COMPATDRIVER)
-
-		isWintun := false
-		for j := 0; ; j++ {
-			driverData, err := devInfo.EnumDriverInfo(devInfoData, setupapi.SPDIT_COMPATDRIVER, j)
-			if err != nil {
-				if err == windows.ERROR_NO_MORE_ITEMS {
-					break
-				}
-				continue
-			}
-			driverDetailData, err := devInfo.DriverInfoDetail(devInfoData, driverData)
-			if err != nil {
-				continue
-			}
-			if driverDetailData.IsCompatible(hardwareID) {
-				isWintun = true
-				break
-			}
-		}
-		if !isWintun {
-			continue
-		}
-
 		isMember, err := pool.isMember(devInfo, devInfoData)
 		if err != nil {
 			errors = append(errors, err)
@@ -802,6 +746,8 @@ func (wintun *Interface) LUID() uint64 {
 	return ((uint64(wintun.luidIndex) & ((1 << 24) - 1)) << 24) | ((uint64(wintun.ifType) & ((1 << 16) - 1)) << 48)
 }
 
+// isOurHardwareID tests SPDRP_HARDWAREID device registry property against expected hardware ID
+// string.
 func isOurHardwareID(property interface{}) bool {
 	hwidLC := strings.ToLower(hardwareID)
 
