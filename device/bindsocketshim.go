@@ -8,7 +8,7 @@ package device
 import (
 	"errors"
 
-	"golang.zx2c4.com/wireguard/conn"
+	"github.com/k-vpn/wireguard-go/conn"
 )
 
 // TODO(crawshaw): this method is a compatibility shim. Replace with direct use of conn.

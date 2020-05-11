@@ -8,7 +8,7 @@ package device
 import (
 	"errors"
 
-	"golang.zx2c4.com/wireguard/conn"
+	"github.com/k-vpn/wireguard-go/conn"
 )
 
 type DummyDatagram struct {
