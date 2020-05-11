@@ -13,10 +13,10 @@ import (
 
 	"golang.org/x/net/ipv4"
 	"golang.org/x/net/ipv6"
-	"golang.zx2c4.com/wireguard/conn"
-	"golang.zx2c4.com/wireguard/ratelimiter"
-	"golang.zx2c4.com/wireguard/rwcancel"
-	"golang.zx2c4.com/wireguard/tun"
+	"github.com/k-vpm/wireguard-go/conn"
+	"github.com/k-vpm/wireguard-go/ratelimiter"
+	"github.com/k-vpm/wireguard-go/rwcancel"
+	"github.com/k-vpm/wireguard-go/tun"
 )
 
 type Device struct {

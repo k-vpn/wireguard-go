@@ -15,9 +15,9 @@ import (
 	"strconv"
 	"syscall"
 
-	"golang.zx2c4.com/wireguard/device"
-	"golang.zx2c4.com/wireguard/ipc"
-	"golang.zx2c4.com/wireguard/tun"
+	"github.com/k-vpm/wireguard-go/device"
+	"github.com/k-vpm/wireguard-go/ipc"
+	"github.com/k-vpm/wireguard-go/tun"
 )
 
 const (
